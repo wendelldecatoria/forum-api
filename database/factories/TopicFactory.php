@@ -3,6 +3,8 @@
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 use App\Models\Topic;
+use App\Models\Section;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +22,9 @@ use App\Models\Topic;
  */
 $factory->define(Topic::class, function (Faker $faker) {
     return [
-        // TODO
+        'section_id'    => factory(Section::class)->create()->id,
+        'title'         => $faker->word,
+        'body'          => $faker->sentence($nbWords = 2, $variableNbWords = true),
+        'user_id'       => factory(User::class)->create()->id
     ];
 });

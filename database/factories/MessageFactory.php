@@ -3,6 +3,8 @@
 use Faker\Generator as Faker;
 use Illuminate\Database\Eloquent\Factory;
 use App\Models\Message;
+use App\Models\Topic;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +22,10 @@ use App\Models\Message;
  */
 $factory->define(Message::class, function (Faker $faker) {
     return [
-        // TODO
+        'topic_id'          => factory(Topic::class)->create()->id,
+        'parent_id'         => $faker->unique()->numberBetween(1, 20),
+        'body'              => $faker->paragraph($nbSentences = 3, $variableNbSentences = true),
+        'is_highlight'      => $faker->boolean(50),
+        'user_id'           => factory(User::class)->create()->id
     ];
 });
