@@ -21,6 +21,7 @@ Route::group(['namespace' => 'Api', 'prefix' => 'v1'], function () {
 
     // Topics
     Route::get('/topics/{topic}/thread', 'TopicThreadController@show');
+    Route::get('/topics/{topic}/messages', 'TopicMessagesController@show');
     Route::apiResource('topics', 'TopicController');
 
 
