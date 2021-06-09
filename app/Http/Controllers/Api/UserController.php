@@ -55,7 +55,14 @@ class UserController extends Controller
             'password' => 'required',
         ]);
 
-        return User::create($request->all());
+        $user =  User::create($request->all());
+
+        if (isset($request->avatar)) {
+
+            $user->addMediaFromRequest('avatar')->toMediaCollection('avatars');
+        }
+
+        return $user;
     }
 
     /**

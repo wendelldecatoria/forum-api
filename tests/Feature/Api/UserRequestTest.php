@@ -15,6 +15,7 @@ class UserRequestTest extends TestCase
         $this->assertArrayHasKey('email', $request);
         $this->assertArrayHasKey('nickname', $request);
         $this->assertArrayHasKey('bio', $request);
+        $this->assertArrayHasKey('avatar', $request);
         $this->assertArrayHasKey('created_at', $request);
         $this->assertArrayHasKey('updated_at', $request);
      }
