@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\Transformer\UserTransformer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -10,13 +11,23 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     /**
+     * @var App\Http\Helpers\Transformer\UserTransformer
+     */
+    protected $userTransformer;
+
+    public function __construct(UserTransformer $userTransformer)
+    {
+        $this->userTransformer = $userTransformer;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return Collection
      */
     public function index()
     {
-        return User::all();
+        return $this->userTransformer->transformCollection(User::all()->toArray());
     }
 
     /**
@@ -27,7 +38,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return $user;
+        return $this->userTransformer->transform($user);
     }
 
     /**

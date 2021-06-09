@@ -3,12 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\Transformer\MessageTransformer;
 use App\Models\Message;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
+
+    /**
+     * @var App\Http\Helpers\Transformer\MessageTransformer
+     */
+    protected $messageTransformer;
+
+    public function __construct(MessageTransformer $messageTransformer)
+    {
+        $this->messageTransformer = $messageTransformer;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +28,7 @@ class MessageController extends Controller
      */
     public function index()
     {
-        return Message::all();
+        return $this->messageTransformer->transformCollection(Message::all()->toArray());
     }
 
     /**
@@ -27,7 +39,7 @@ class MessageController extends Controller
      */
     public function show(Message $message)
     {
-        return $message;
+        return $this->messageTransformer->transform($message);
     }
 
     /**
