@@ -3,20 +3,37 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Helpers\Transformer\MessageTransformer;
 use App\Models\Message;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 
 class MessageController extends Controller
 {
+
+    /**
+     * @var App\Http\Helpers\Transformer\MessageTransformer
+     */
+    protected $messageTransformer;
+
+    public function __construct(MessageTransformer $messageTransformer)
+    {
+        $this->messageTransformer = $messageTransformer;
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return Collection
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Message::all();
+        $limit = $request->limit ?? 10;
+        $items = $this->messageTransformer->transformCollection(Message::all()->toArray());
+        return $this->paginate($items, $limit);
     }
 
     /**
@@ -27,7 +44,7 @@ class MessageController extends Controller
      */
     public function show(Message $message)
     {
-        return $message;
+        return $this->messageTransformer->transform($message);
     }
 
     /**
@@ -40,9 +57,21 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
+            'parent_id' => 'required',
             'topic_id' => 'required',
             'body' => 'required',
         ]);
+
+        // get topic id for a give parent id
+        $message = Message::where('id', $request->parent_id)->first();
+
+        if($message->topic_id != $request->topic_id) {
+            return response()->json([
+                'error' => [
+                    'message' => "Cannot link a message to a parent_id that doesn't share the same topic_id",
+                ]
+            ]);
+        }
 
         return Message::create($request->all());
     }
@@ -71,5 +100,19 @@ class MessageController extends Controller
     public function destroy(Message $message)
     {
         $message->delete();
+    }
+
+    private function paginate($items, $perPage = 10) {
+        // TODO: need to move this to its own Pagination helper class
+
+        $page = Paginator::resolveCurrentPage('page') ?: 1;
+        $startIndex = ($page - 1) * $perPage;
+        $total = count($items);
+        $results = array_slice($items, $startIndex, $perPage);
+
+        return new LengthAwarePaginator($results, $total, $perPage, $page, [
+            'path' => Paginator::resolveCurrentPath(),
+            'pageName' => 'page',
+        ]);
     }
 }
