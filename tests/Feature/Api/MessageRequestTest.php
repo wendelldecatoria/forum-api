@@ -16,4 +16,17 @@ class MessageRequestTest extends TestCase
         $this->assertArrayHasKey('created_at', $request);
         $this->assertArrayHasKey('updated_at', $request);
      }
+
+     /** @test */
+     public function creating_a_message_with_parent_id_that_belongs_to_a_different_topic_id_must_return_an_error() {
+        $request = $this->json('POST', 'api/v1/messages', [
+                // values based on sample test case in local env
+                'topic_id'  => 21,
+                'parent_id' => 4,
+                'user_id'   => 1,
+                'body'      => "lorem ipsum dolor sit amet"
+        ])->decodeResponseJson();
+
+        $this->assertArrayHasKey('error', $request);
+     }
 }
