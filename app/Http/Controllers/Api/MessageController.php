@@ -57,9 +57,21 @@ class MessageController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
+            'parent_id' => 'required',
             'topic_id' => 'required',
             'body' => 'required',
         ]);
+
+        // get topic id for a give parent id
+        $message = Message::where('id', $request->parent_id)->first();
+
+        if($message->topic_id != $request->topic_id) {
+            return response()->json([
+                'error' => [
+                    'message' => "Cannot link a message to a parent_id that doesn't share the same topic_id",
+                ]
+            ]);
+        }
 
         return Message::create($request->all());
     }
