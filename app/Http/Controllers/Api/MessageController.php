@@ -7,6 +7,9 @@ use App\Http\Helpers\Transformer\MessageTransformer;
 use App\Models\Message;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 
 class MessageController extends Controller
 {
@@ -26,9 +29,11 @@ class MessageController extends Controller
      *
      * @return Collection
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->messageTransformer->transformCollection(Message::all()->toArray());
+        $limit = $request->limit ?? 10;
+        $items = $this->messageTransformer->transformCollection(Message::all()->toArray());
+        return $this->paginate($items, $limit);
     }
 
     /**
@@ -83,5 +88,19 @@ class MessageController extends Controller
     public function destroy(Message $message)
     {
         $message->delete();
+    }
+
+    private function paginate($items, $perPage = 10) {
+        // TODO: need to move this to its own Pagination helper class
+
+        $page = Paginator::resolveCurrentPage('page') ?: 1;
+        $startIndex = ($page - 1) * $perPage;
+        $total = count($items);
+        $results = array_slice($items, $startIndex, $perPage);
+
+        return new LengthAwarePaginator($results, $total, $perPage, $page, [
+            'path' => Paginator::resolveCurrentPath(),
+            'pageName' => 'page',
+        ]);
     }
 }
